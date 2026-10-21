@@ -1,5 +1,4 @@
-# Go-in-python-
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,13 +59,13 @@
         }
 
         /* Syntax Highlight Styles */
-        .py-keyword { color: #c678dd; font-weight: bold; } /* def, if, return, import */
-        .py-datatype { color: #e5c07b; } /* int, str, float, list, dict */
-        .py-string { color: #98c379; }   /* "hello", 'world' */
-        .py-number { color: #d19a66; }   /* 123, 45.67 */
-        .py-comment { color: #5c6370; font-style: italic; } /* # comments */
-        .py-builtin { color: #61afef; }   /* print, input, len */
-        .py-operator { color: #56b6c2; }  /* =, +, -, *, / */
+        .py-keyword { color: #c678dd; font-weight: bold; }
+        .py-datatype { color: #e5c07b; }
+        .py-string { color: #98c379; }
+        .py-number { color: #d19a66; }
+        .py-comment { color: #5c6370; font-style: italic; }
+        .py-builtin { color: #61afef; }
+        .py-operator { color: #56b6c2; }
         
         /* Mirror Editor Overlay Engine */
         #editorContainer {
@@ -100,7 +99,6 @@
             background: transparent;
             caret-color: #528bfc;
             resize: none;
-            /* Disable auto-capitalization and spellcheck features on mobile */
             text-transform: none;
             -webkit-text-size-adjust: none;
         }
@@ -116,7 +114,7 @@
             <span class="text-[11px] text-slate-500 border-l border-[#333842] pl-2 hidden sm:inline">Interactive Studio</span>
         </div>
 
-        <!-- Desktop & Mobile Size Adjuster Controls -->
+        <!-- Controls Bar -->
         <div class="flex items-center gap-2">
             <!-- Text Size Zoom Controls -->
             <div class="bg-[#21252b] border border-[#333842] rounded flex items-center px-1 py-0.5 text-xs text-slate-400">
@@ -155,19 +153,15 @@
             </div>
         </div>
 
-        <!-- Code Typing Console Area with Line Numbers & Realtime Syntax Highlight Overlay -->
+        <!-- Code Workspace Area -->
         <div class="flex-1 flex relative overflow-hidden bg-[#21252b]">
-            <!-- Line Numbers Bar -->
             <div id="lineNumbers" class="w-10 bg-[#1b1d23] text-slate-600 font-mono text-xs py-3 text-right pr-2 select-none leading-relaxed border-r border-[#333842] flex-shrink-0 code-font">
                 1
             </div>
 
-            <!-- Code Overlay Area -->
             <div id="editorContainer" class="flex-1 relative h-full">
-                <!-- Highlight Overlay Screen -->
                 <pre id="highlightOverlay" class="code-font" aria-hidden="true"><code id="highlightCode"></code></pre>
                 
-                <!-- Explicit Keyboard Auto-Capitalize & Auto-Correct Disabled Area -->
                 <textarea id="codeEditor" spellcheck="false" 
                     autocapitalize="off" 
                     autocomplete="off" 
@@ -180,7 +174,7 @@
             </div>
         </div>
 
-        <!-- Dynamic Real-Time Syntax/Lint Validation Bar -->
+        <!-- Syntax Diagnostics Bar -->
         <div id="codeLinterBar" class="bg-[#1b1d23] border-t border-[#333842] px-4 py-1.5 flex items-center justify-between text-xs font-mono hidden flex-shrink-0">
             <div id="linterMessage" class="flex items-center gap-2 text-rose-400 text-[11px]">
                 <i class="fa-solid fa-triangle-exclamation"></i> <span>Syntax Warning detected</span>
@@ -191,6 +185,7 @@
         </div>
     </main>
 
+    <!-- Execution Terminal Modal -->
     <div id="outputConsoleModal" class="fixed inset-0 bg-[#181a1f] z-50 flex flex-col hidden">
         <div class="bg-[#1b1d23] border-b border-[#333842] px-4 py-2.5 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -218,6 +213,7 @@
         </div>
     </div>
 
+    <!-- Public Library Modal -->
     <div id="packagesDrawerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-[#1b1d23] border border-[#333842] rounded-xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
             <div class="bg-[#21252b] px-4 py-3 border-b border-[#333842] flex justify-between items-center">
@@ -238,6 +234,7 @@
         </div>
     </div>
 
+    <!-- Updated Direct-Paste Admin Portal -->
     <div id="adminConsoleView" class="fixed inset-0 bg-[#181a1f] z-50 flex flex-col hidden overflow-y-auto">
         <div class="bg-[#1b1d23] border-b border-[#333842] px-6 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -245,8 +242,8 @@
                     <i class="fa-solid fa-user-shield text-lg"></i>
                 </div>
                 <div>
-                    <h2 class="text-base font-bold text-white">Go-In-Python Admin Management Panel</h2>
-                    <p class="text-xs text-slate-400">Package, Module & File Format Manager for Vercel Deployments</p>
+                    <h2 class="text-base font-bold text-white">Go-In-Python Admin Portal</h2>
+                    <p class="text-xs text-slate-400">Direct Code Upload & Automated Package Manager</p>
                 </div>
             </div>
             <button onclick="exitAdminView()" class="bg-[#21252b] hover:bg-[#2c313a] text-slate-300 px-4 py-1.5 rounded text-xs font-semibold border border-[#333842] transition">
@@ -254,90 +251,84 @@
             </button>
         </div>
 
-        <!-- Admin Password Form -->
+        <!-- Password Auth Screen -->
         <div id="adminAuthScreen" class="flex-1 flex items-center justify-center p-4">
             <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-6 w-full max-w-md shadow-2xl text-center">
                 <div class="bg-blue-600/10 text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-500/20">
                     <i class="fa-solid fa-lock text-xl"></i>
                 </div>
-                <h3 class="text-base font-bold text-white mb-1">Admin Authentication Required</h3>
-                <p class="text-xs text-slate-400 mb-5">Enter administrator key to manage libraries & upload package files</p>
+                <h3 class="text-base font-bold text-white mb-1">Admin Passcode Required</h3>
+                <p class="text-xs text-slate-400 mb-5">Enter administrator key to upload & auto-analyse Python libraries</p>
 
                 <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" 
                     class="w-full bg-[#21252b] border border-[#333842] text-white rounded px-3 py-2.5 text-xs focus:outline-none focus:border-blue-500 mb-3 text-center">
 
                 <button onclick="authenticateAdmin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-xs transition">
-                    Unlock Admin Dashboard
+                    Unlock Admin Portal
                 </button>
                 <p id="adminAuthError" class="text-xs text-rose-400 mt-2.5 hidden">Invalid Administrator Password!</p>
             </div>
         </div>
 
-        <!-- Admin Main Panel -->
+        <!-- Direct Upload & Paste Management Panel -->
         <div id="adminDashboardBody" class="hidden p-6 max-w-5xl mx-auto w-full space-y-6">
             
-            <!-- File Upload & Format Guide Panel -->
             <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-5 shadow-lg">
                 <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-file-arrow-up text-blue-400"></i> Upload Python Package / File Module
+                    <i class="fa-solid fa-paste text-blue-400"></i> Direct Paste / Upload NumPy Python Code
                 </h3>
                 
-                <!-- Format Rules & Vercel Checklist Box -->
-                <div class="bg-[#21252b] border border-blue-500/20 p-3.5 rounded-lg mb-4 text-xs text-slate-300 space-y-2">
-                    <p class="font-bold text-blue-400"><i class="fa-solid fa-circle-info mr-1"></i> Admin File Upload Format Rules for Vercel Deployment:</p>
-                    <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-400 pl-1">
-                        <li><b>Supported Extensions:</b> Single Python files (<code class="text-amber-300">.py</code>), Text configuration (<code class="text-amber-300">.txt</code>), JSON data (<code class="text-amber-300">.json</code>).</li>
-                        <li><b>Module Import Name:</b> Must be lowercase with no spaces or special characters (e.g., <code class="text-emerald-400">myutils</code>, <code class="text-emerald-400">math_helper</code>).</li>
-                        <li><b>Vercel Compatibility:</b> Ensure no restricted native C-extension imports are used inside Pyodide web environment.</li>
-                    </ul>
+                <div class="bg-[#21252b] border border-blue-500/20 p-3 rounded-lg mb-4 text-xs text-slate-300">
+                    <p class="text-blue-400 font-semibold mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Direct Code Analysis Engine:</p>
+                    <p class="text-[11px] text-slate-400">Akkada unde code direct ga kindha box lo paste chesi, convenient ga single click <b>"Analyse Code"</b> press cheyandi. Machine direct ga NumPy functions list compile chesi automatically name & import credentials set chestundi!</p>
                 </div>
 
-                <!-- Direct File Upload Picker -->
-                <div class="mb-4 p-4 border-2 border-dashed border-[#333842] hover:border-blue-500 rounded-lg text-center transition bg-[#21252b]">
-                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-400 mb-2"></i>
-                    <p class="text-xs text-slate-300 font-medium">Select or drag & drop Python source file (.py)</p>
-                    <p class="text-[10px] text-slate-500 mt-1">Code will automatically populate in editor below</p>
-                    <input type="file" id="fileUploadInput" accept=".py,.txt,.json" onchange="handleFileUpload(event)" class="hidden">
-                    <button onclick="document.getElementById('fileUploadInput').click()" class="mt-3 bg-[#1b1d23] hover:bg-[#2c313a] border border-[#333842] text-xs px-4 py-1.5 rounded text-slate-200 transition">
-                        Browse Computer Files
-                    </button>
+                <!-- Direct Paste Box -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="text-xs font-semibold text-slate-300">Paste Full Python / NumPy Code Source Here:</label>
+                        <button onclick="analysePastedCode()" class="text-xs bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded transition font-mono">
+                            <i class="fa-solid fa-microchip mr-1"></i> Auto-Analyse Code
+                        </button>
+                    </div>
+                    <textarea id="pkgCodeInput" placeholder="# Direct ga ikkada NumPy / Pure Python Code paste cheyandi..." 
+                        class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded p-3 text-xs font-mono h-48 focus:outline-none focus:border-blue-500 leading-relaxed" oninput="analysePastedCode()"></textarea>
                 </div>
 
-                <!-- Manual Form & Editor Inputs -->
+                <!-- Auto Detected Package Metadata -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Package Title</label>
-                        <input type="text" id="pkgNameInput" placeholder="e.g. Data Matrix Calculator" 
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Package Title (Auto-Detected)</label>
+                        <input type="text" id="pkgNameInput" placeholder="e.g. NumPy Pure Python Library" 
                             class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Module Import Name (python keyword)</label>
-                        <input type="text" id="pkgImportNameInput" placeholder="e.g. matrixcalc" 
-                            class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Module Import Keyword (Use in Code: import numpy)</label>
+                        <input type="text" id="pkgImportNameInput" placeholder="numpy" value="numpy" 
+                            class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-500 font-mono">
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Source Code (.py Content)</label>
-                    <textarea id="pkgCodeInput" placeholder="# Python Module Code Source..." 
-                        class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded p-3 text-xs font-mono h-36 focus:outline-none focus:border-blue-500 leading-relaxed"></textarea>
+                <!-- Analysis Summary Box -->
+                <div id="codeAnalysisOutput" class="bg-[#181a1f] border border-[#333842] p-3 rounded-lg text-xs font-mono mb-4 hidden text-emerald-400">
+                    <i class="fa-solid fa-circle-check mr-1"></i> <span id="analysisText">Code analysed successfully!</span>
                 </div>
 
                 <div class="flex justify-between items-center">
                     <span id="adminPublishStatus" class="text-xs font-mono text-emerald-400"></span>
                     <button onclick="publishPackageToDatabase()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2 rounded transition flex items-center gap-2">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Save & Publish Package
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload & Enable in Portal
                     </button>
                 </div>
             </div>
 
-            <!-- Published Packages List -->
+            <!-- Published Packages Dashboard List -->
             <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-5 shadow-lg">
                 <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-blue-400"></i> Active Database Libraries
+                    <i class="fa-solid fa-database text-blue-400"></i> Portal Active NumPy & Custom Modules
                 </h3>
                 <div id="adminPackagesList" class="space-y-2">
-                    <p class="text-xs text-slate-400">Fetching stored libraries...</p>
+                    <p class="text-xs text-slate-400">Loading stored libraries from portal...</p>
                 </div>
             </div>
         </div>
@@ -348,7 +339,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Initialization
+        // Firebase Setup
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'go-in-python-app';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "demo-key",
@@ -372,7 +363,7 @@
         window.db = db;
         window.appId = appId;
 
-        // Custom Safe Syntax Highlighting Regex Engine for Python Data Types & Keywords
+        // Code Syntax Engine
         window.renderSyntaxHighlight = function() {
             const editor = document.getElementById('codeEditor');
             const code = editor.value;
@@ -383,44 +374,35 @@
                 return;
             }
 
-            // Step 1: Escape pure HTML entities first to prevent tag injection into overlay text
             let escaped = code
                 .replace(/&/g, "&amp;")
                 .replace(/</g, "&lt;")
                 .replace(/>/g, "&gt;");
 
-            // Tokenizing strings, comments and keywords without exposing internal 'class' string to regex loops
             const tokens = [];
             const tokenMarker = '___TK_';
 
-            // 1. Strings first (Double and single quotes)
             escaped = escaped.replace(/("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')/g, function(match) {
                 tokens.push('<span class="py-string">' + match + '</span>');
                 return tokenMarker + (tokens.length - 1) + '___';
             });
 
-            // 2. Comments
             escaped = escaped.replace(/(#.*$)/gm, function(match) {
                 tokens.push('<span class="py-comment">' + match + '</span>');
                 return tokenMarker + (tokens.length - 1) + '___';
             });
 
-            // 3. Keywords (Python 'class', 'def', 'if', etc.)
             const keywords = /\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|raise|with|lambda|pass|break|continue|global|assert|yield|async|await|and|or|not|is|in)\b/g;
             escaped = escaped.replace(keywords, '<span class="py-keyword">$1</span>');
 
-            // 4. Data Types
             const datatypes = /\b(int|str|float|list|dict|set|tuple|bool|bytes|type|True|False|None)\b/g;
             escaped = escaped.replace(datatypes, '<span class="py-datatype">$1</span>');
 
-            // 5. Builtins
             const builtins = /\b(print|input|len|range|enumerate|open|zip|map|filter|sum|min|max|abs|round|sorted|id)\b/g;
             escaped = escaped.replace(builtins, '<span class="py-builtin">$1</span>');
 
-            // 6. Numbers
             escaped = escaped.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="py-number">$1</span>');
 
-            // Restore string and comment tokens safely without matching 'class' attribute of newly injected spans
             for (let i = 0; i < tokens.length; i++) {
                 escaped = escaped.replace(tokenMarker + i + '___', tokens[i]);
             }
@@ -452,7 +434,6 @@
             });
         };
 
-        // Real-time Code Diagnostic Engine
         function checkCodeDiagnostics() {
             const code = document.getElementById('codeEditor').value;
             const linterBar = document.getElementById('codeLinterBar');
@@ -470,8 +451,6 @@
 
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i];
-
-                // Check capitalized functions (Print, Input, Len)
                 const capFuncMatch = line.match(/\b(Print|Input|Len|Range|Str|Int|Type|List|Dict)\s*\(/);
                 if (capFuncMatch) {
                     const incorrectFunc = capFuncMatch[1];
@@ -508,7 +487,6 @@
 
         window.formatCode = function() {
             let code = document.getElementById('codeEditor').value;
-            // Basic Auto Formatter: Removes trailing whitespaces
             code = code.split('\n').map(l => l.trimEnd()).join('\n');
             document.getElementById('codeEditor').value = code;
             handleCodeInput();
@@ -592,7 +570,6 @@ sys.stderr = io.StringIO()
 
                 let resultStr = '';
                 if (stdout) {
-                    // Escape HTML characters in stdout so strings like <class 'str'> display properly in terminal
                     resultStr += escapeHtml(stdout);
                 }
                 if (stderr) {
@@ -626,7 +603,15 @@ sys.stderr = io.StringIO()
             onSnapshot(publicCol, (snapshot) => {
                 publishedPackages = [];
                 snapshot.forEach(docSnap => {
-                    publishedPackages.push({ id: docSnap.id, ...docSnap.data() });
+                    const data = docSnap.data();
+                    publishedPackages.push({ id: docSnap.id, ...data });
+                    
+                    // Auto Pre-load package into runtime if pyodide is active
+                    if(pyodideInstance && data.importName && data.code) {
+                        try {
+                            pyodideInstance.FS.writeFile(`${data.importName}.py`, data.code);
+                        } catch(e) {}
+                    }
                 });
                 renderPublicPackages();
                 renderAdminPackages();
@@ -649,7 +634,7 @@ sys.stderr = io.StringIO()
                         <p class="text-[11px] font-mono text-blue-400">import ${escapeHtml(pkg.importName)}</p>
                     </div>
                     <button onclick="installPackageToPyodide('${pkg.id}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded transition">
-                        Install
+                        Install Module
                     </button>
                 </div>
             `).join('');
@@ -666,10 +651,10 @@ sys.stderr = io.StringIO()
                 <div class="bg-[#21252b] border border-[#333842] p-3 rounded-lg flex justify-between items-center">
                     <div>
                         <h4 class="text-xs font-bold text-white">${escapeHtml(pkg.name)} <span class="text-slate-400 font-normal">(${pkg.importName}.py)</span></h4>
-                        <p class="text-[11px] text-slate-500">Package ID: ${pkg.id}</p>
+                        <p class="text-[11px] text-slate-500">Package Key: ${pkg.id}</p>
                     </div>
                     <button onclick="deletePackageFromDatabase('${pkg.id}')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs px-3 py-1 rounded transition">
-                        Delete
+                        Remove
                     </button>
                 </div>
             `).join('');
@@ -685,10 +670,10 @@ sys.stderr = io.StringIO()
                 const modal = document.getElementById('outputConsoleModal');
                 const terminal = document.getElementById('terminalOutput');
                 modal.classList.remove('hidden');
-                terminal.innerHTML = `<span class="text-emerald-400">[Package Installed Successfully]</span>\n\nYou can now use <span class="text-blue-400 font-mono">import ${pkg.importName}</span> inside your Python code!`;
+                terminal.innerHTML = `<span class="text-emerald-400">[Package Active]</span>\n\nYou can now type <span class="text-blue-400 font-mono">import ${pkg.importName}</span> directly in main editor!`;
                 closePackagesDrawer();
             } catch (err) {
-                alert("Error installing package: " + err.message);
+                alert("Error activating package: " + err.message);
             }
         };
 
@@ -703,24 +688,38 @@ sys.stderr = io.StringIO()
             }
         };
 
-        // File Upload Handler for Admin Panel
-        window.handleFileUpload = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // Automated Code Analysis Engine
+        window.analysePastedCode = function() {
+            const code = document.getElementById('codeEditor') ? document.getElementById('pkgCodeInput').value : '';
+            const box = document.getElementById('codeAnalysisOutput');
+            const txt = document.getElementById('analysisText');
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                document.getElementById('pkgCodeInput').value = content;
-                
-                // Auto fill name and import name
-                const fileNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.'));
-                const cleanImportName = fileNameWithoutExt.toLowerCase().replace(/[^a-z0-9_]/g, '');
-                
-                document.getElementById('pkgNameInput').value = fileNameWithoutExt.replace(/_/g, ' ');
-                document.getElementById('pkgImportNameInput').value = cleanImportName;
-            };
-            reader.readAsText(file);
+            if (!code.trim()) {
+                box.classList.add('hidden');
+                return;
+            }
+
+            // Detect functions, classes and numpy characteristics
+            const classMatches = code.match(/class\s+([A-Za-z0-9_]+)/g) || [];
+            const defMatches = code.match(/def\s+([A-Za-z0-9_]+)/g) || [];
+            
+            let detectedName = "Pure Python Library";
+            let importName = "numpy";
+
+            if (code.includes('ndarray') || code.includes('linspace') || code.includes('arange')) {
+                detectedName = "Lightweight NumPy Engine";
+                importName = "numpy";
+            } else if (classMatches.length > 0) {
+                const className = classMatches[0].replace('class ', '').trim();
+                detectedName = `${className} Module`;
+                importName = className.toLowerCase();
+            }
+
+            document.getElementById('pkgNameInput').value = detectedName;
+            document.getElementById('pkgImportNameInput').value = importName;
+
+            box.classList.remove('hidden');
+            txt.innerHTML = `Code Analysis Complete: Found <b>${classMatches.length} classes</b>, <b>${defMatches.length} functions</b>. Configured import name as '<code class="text-amber-300">${importName}</code>'.`;
         };
 
         window.publishPackageToDatabase = async function() {
@@ -731,13 +730,13 @@ sys.stderr = io.StringIO()
 
             if (!name || !importName || !code) {
                 status.className = "text-xs font-mono text-rose-400";
-                status.innerText = "Please fill in all package details!";
+                status.innerText = "Please paste code into the box above first!";
                 return;
             }
 
             try {
                 status.className = "text-xs font-mono text-amber-400";
-                status.innerText = "Publishing package to database...";
+                status.innerText = "Publishing module to web environment...";
 
                 const pkgDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'packages', importName);
                 await setDoc(pkgDocRef, {
@@ -748,14 +747,18 @@ sys.stderr = io.StringIO()
                 });
 
                 status.className = "text-xs font-mono text-emerald-400";
-                status.innerText = `Package '${name}' successfully published!`;
+                status.innerText = `Library '${name}' successfully published!`;
 
-                document.getElementById('pkgNameInput').value = '';
-                document.getElementById('pkgImportNameInput').value = '';
+                // Auto-write to Pyodide filesystem
+                if(pyodideInstance) {
+                    pyodideInstance.FS.writeFile(`${importName}.py`, code);
+                }
+
                 document.getElementById('pkgCodeInput').value = '';
+                document.getElementById('codeAnalysisOutput').classList.add('hidden');
             } catch (err) {
                 status.className = "text-xs font-mono text-rose-400";
-                status.innerText = "Error saving package: " + err.message;
+                status.innerText = "Error publishing library: " + err.message;
             }
         };
 
@@ -807,3 +810,4 @@ sys.stderr = io.StringIO()
     </script>
 </body>
 </html>
+```
