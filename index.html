@@ -1,0 +1,809 @@
+# Go-in-python-
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Go-In-Python Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        studio: {
+                            bg: '#181a1f',
+                            editor: '#21252b',
+                            header: '#1b1d23',
+                            border: '#333842',
+                            accent: '#2563eb',
+                            text: '#abb2bf'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Pyodide Core Engine -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+    <style>
+        body {
+            background-color: #181a1f;
+            color: #abb2bf;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            touch-action: manipulation;
+        }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #181a1f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333842;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5263;
+        }
+        .code-font {
+            font-family: 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* Syntax Highlight Styles */
+        .py-keyword { color: #c678dd; font-weight: bold; } /* def, if, return, import */
+        .py-datatype { color: #e5c07b; } /* int, str, float, list, dict */
+        .py-string { color: #98c379; }   /* "hello", 'world' */
+        .py-number { color: #d19a66; }   /* 123, 45.67 */
+        .py-comment { color: #5c6370; font-style: italic; } /* # comments */
+        .py-builtin { color: #61afef; }   /* print, input, len */
+        .py-operator { color: #56b6c2; }  /* =, +, -, *, / */
+        
+        /* Mirror Editor Overlay Engine */
+        #editorContainer {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        #highlightOverlay, #codeEditor {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            margin: 0;
+            border: none;
+            outline: none;
+            white-space: pre;
+            word-wrap: normal;
+            overflow: auto;
+            tab-size: 4;
+        }
+        #highlightOverlay {
+            pointer-events: none;
+            z-index: 1;
+            color: #abb2bf;
+        }
+        #codeEditor {
+            z-index: 2;
+            color: transparent;
+            background: transparent;
+            caret-color: #528bfc;
+            resize: none;
+            /* Disable auto-capitalization and spellcheck features on mobile */
+            text-transform: none;
+            -webkit-text-size-adjust: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col bg-[#181a1f] text-slate-200 select-none">
+
+    <header id="mainHeader" class="bg-[#1b1d23] border-b border-[#333842] px-3 py-2 flex justify-between items-center z-20 h-12 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <span class="font-bold text-slate-100 text-sm tracking-wide flex items-center gap-2">
+                <i class="fa-brands fa-python text-blue-500 text-lg"></i> Go-In-Python
+            </span>
+            <span class="text-[11px] text-slate-500 border-l border-[#333842] pl-2 hidden sm:inline">Interactive Studio</span>
+        </div>
+
+        <!-- Desktop & Mobile Size Adjuster Controls -->
+        <div class="flex items-center gap-2">
+            <!-- Text Size Zoom Controls -->
+            <div class="bg-[#21252b] border border-[#333842] rounded flex items-center px-1 py-0.5 text-xs text-slate-400">
+                <button onclick="changeFontSize(-1)" class="px-1.5 py-0.5 hover:text-white" title="Decrease Font Size"><i class="fa-solid fa-minus text-[10px]"></i></button>
+                <span id="fontSizeDisplay" class="px-1 text-[11px] font-mono">13px</span>
+                <button onclick="changeFontSize(1)" class="px-1.5 py-0.5 hover:text-white" title="Increase Font Size"><i class="fa-solid fa-plus text-[10px]"></i></button>
+            </div>
+
+            <!-- Engine Status Badge -->
+            <div id="engineStatusBadge" class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-1 rounded flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i> <span class="hidden sm:inline">Loading...</span>
+            </div>
+
+            <!-- Library Manager Modal Trigger -->
+            <button onclick="openPackagesDrawer()" class="bg-[#21252b] hover:bg-[#2c313a] text-slate-300 text-xs px-2.5 py-1 rounded border border-[#333842] transition flex items-center gap-1 font-medium">
+                <i class="fa-solid fa-cubes text-blue-400"></i> <span class="hidden sm:inline">Packages</span>
+            </button>
+
+            <!-- RUN Button -->
+            <button id="runBtn" onclick="executePython()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-4 py-1 rounded transition shadow flex items-center gap-1.5">
+                <i class="fa-solid fa-play text-[10px]"></i> RUN
+            </button>
+        </div>
+    </header>
+
+    <main id="editorWorkspace" class="flex-1 flex flex-col relative bg-[#21252b] overflow-hidden">
+        <!-- Editor Header Sub-bar -->
+        <div class="bg-[#1b1d23] px-4 py-1 border-b border-[#333842] flex justify-between items-center text-xs text-slate-400 flex-shrink-0">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-file-code text-blue-400"></i>
+                <span class="font-mono text-slate-300 text-[12px]">main.py</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px]">
+                <button onclick="formatCode()" class="hover:text-white transition"><i class="fa-solid fa-align-left"></i> Format</button>
+                <button onclick="clearEditor()" class="hover:text-white transition"><i class="fa-solid fa-eraser"></i> Clear</button>
+            </div>
+        </div>
+
+        <!-- Code Typing Console Area with Line Numbers & Realtime Syntax Highlight Overlay -->
+        <div class="flex-1 flex relative overflow-hidden bg-[#21252b]">
+            <!-- Line Numbers Bar -->
+            <div id="lineNumbers" class="w-10 bg-[#1b1d23] text-slate-600 font-mono text-xs py-3 text-right pr-2 select-none leading-relaxed border-r border-[#333842] flex-shrink-0 code-font">
+                1
+            </div>
+
+            <!-- Code Overlay Area -->
+            <div id="editorContainer" class="flex-1 relative h-full">
+                <!-- Highlight Overlay Screen -->
+                <pre id="highlightOverlay" class="code-font" aria-hidden="true"><code id="highlightCode"></code></pre>
+                
+                <!-- Explicit Keyboard Auto-Capitalize & Auto-Correct Disabled Area -->
+                <textarea id="codeEditor" spellcheck="false" 
+                    autocapitalize="off" 
+                    autocomplete="off" 
+                    autocorrect="off"
+                    placeholder="# Write Python Code Here..."
+                    class="code-font"
+                    oninput="handleCodeInput()" 
+                    onscroll="syncScroll()"
+                    onkeydown="handleTabIndent(event)"></textarea>
+            </div>
+        </div>
+
+        <!-- Dynamic Real-Time Syntax/Lint Validation Bar -->
+        <div id="codeLinterBar" class="bg-[#1b1d23] border-t border-[#333842] px-4 py-1.5 flex items-center justify-between text-xs font-mono hidden flex-shrink-0">
+            <div id="linterMessage" class="flex items-center gap-2 text-rose-400 text-[11px]">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span>Syntax Warning detected</span>
+            </div>
+            <button id="linterFixBtn" onclick="applyQuickFix()" class="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] px-2 py-0.5 rounded transition">
+                Quick Fix
+            </button>
+        </div>
+    </main>
+
+    <div id="outputConsoleModal" class="fixed inset-0 bg-[#181a1f] z-50 flex flex-col hidden">
+        <div class="bg-[#1b1d23] border-b border-[#333842] px-4 py-2.5 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-800 p-1.5 rounded text-blue-400 border border-[#333842]">
+                    <i class="fa-solid fa-terminal text-xs"></i>
+                </div>
+                <div>
+                    <h2 class="text-xs font-bold text-white tracking-wide">Execution Terminal Output</h2>
+                    <p class="text-[10px] text-slate-400">Go-In-Python Output Window</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="clearTerminal()" class="bg-[#21252b] hover:bg-[#2c313a] text-slate-300 px-2.5 py-1 rounded text-xs border border-[#333842] transition flex items-center gap-1">
+                    <i class="fa-solid fa-eraser text-amber-400"></i> Clear
+                </button>
+                <button onclick="closeOutputConsole()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1 rounded text-xs transition flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 bg-[#121417] p-4 font-mono text-xs overflow-y-auto leading-relaxed select-text flex flex-col code-font">
+            <div id="terminalOutput" class="whitespace-pre-wrap text-slate-300"></div>
+        </div>
+    </div>
+
+    <div id="packagesDrawerModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-[#1b1d23] border border-[#333842] rounded-xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="bg-[#21252b] px-4 py-3 border-b border-[#333842] flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-blue-400"></i>
+                    <h3 class="text-sm font-bold text-white">Installed Python Libraries</h3>
+                </div>
+                <button onclick="closePackagesDrawer()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="p-4 overflow-y-auto flex-1 space-y-2" id="publicPackagesList">
+                <p class="text-xs text-slate-400 text-center py-4">Loading packages from database...</p>
+            </div>
+
+            <div class="bg-[#21252b] px-4 py-2 border-t border-[#333842] text-[11px] text-slate-400 text-center">
+                Click "Install" to load custom module into current workspace session.
+            </div>
+        </div>
+    </div>
+
+    <div id="adminConsoleView" class="fixed inset-0 bg-[#181a1f] z-50 flex flex-col hidden overflow-y-auto">
+        <div class="bg-[#1b1d23] border-b border-[#333842] px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600/20 text-blue-400 p-2 rounded border border-blue-500/30">
+                    <i class="fa-solid fa-user-shield text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-white">Go-In-Python Admin Management Panel</h2>
+                    <p class="text-xs text-slate-400">Package, Module & File Format Manager for Vercel Deployments</p>
+                </div>
+            </div>
+            <button onclick="exitAdminView()" class="bg-[#21252b] hover:bg-[#2c313a] text-slate-300 px-4 py-1.5 rounded text-xs font-semibold border border-[#333842] transition">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Exit Admin
+            </button>
+        </div>
+
+        <!-- Admin Password Form -->
+        <div id="adminAuthScreen" class="flex-1 flex items-center justify-center p-4">
+            <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-6 w-full max-w-md shadow-2xl text-center">
+                <div class="bg-blue-600/10 text-blue-400 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-500/20">
+                    <i class="fa-solid fa-lock text-xl"></i>
+                </div>
+                <h3 class="text-base font-bold text-white mb-1">Admin Authentication Required</h3>
+                <p class="text-xs text-slate-400 mb-5">Enter administrator key to manage libraries & upload package files</p>
+
+                <input type="password" id="adminPasswordInput" placeholder="Enter Admin Password" 
+                    class="w-full bg-[#21252b] border border-[#333842] text-white rounded px-3 py-2.5 text-xs focus:outline-none focus:border-blue-500 mb-3 text-center">
+
+                <button onclick="authenticateAdmin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded text-xs transition">
+                    Unlock Admin Dashboard
+                </button>
+                <p id="adminAuthError" class="text-xs text-rose-400 mt-2.5 hidden">Invalid Administrator Password!</p>
+            </div>
+        </div>
+
+        <!-- Admin Main Panel -->
+        <div id="adminDashboardBody" class="hidden p-6 max-w-5xl mx-auto w-full space-y-6">
+            
+            <!-- File Upload & Format Guide Panel -->
+            <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-5 shadow-lg">
+                <h3 class="text-sm font-bold text-white mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-file-arrow-up text-blue-400"></i> Upload Python Package / File Module
+                </h3>
+                
+                <!-- Format Rules & Vercel Checklist Box -->
+                <div class="bg-[#21252b] border border-blue-500/20 p-3.5 rounded-lg mb-4 text-xs text-slate-300 space-y-2">
+                    <p class="font-bold text-blue-400"><i class="fa-solid fa-circle-info mr-1"></i> Admin File Upload Format Rules for Vercel Deployment:</p>
+                    <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-400 pl-1">
+                        <li><b>Supported Extensions:</b> Single Python files (<code class="text-amber-300">.py</code>), Text configuration (<code class="text-amber-300">.txt</code>), JSON data (<code class="text-amber-300">.json</code>).</li>
+                        <li><b>Module Import Name:</b> Must be lowercase with no spaces or special characters (e.g., <code class="text-emerald-400">myutils</code>, <code class="text-emerald-400">math_helper</code>).</li>
+                        <li><b>Vercel Compatibility:</b> Ensure no restricted native C-extension imports are used inside Pyodide web environment.</li>
+                    </ul>
+                </div>
+
+                <!-- Direct File Upload Picker -->
+                <div class="mb-4 p-4 border-2 border-dashed border-[#333842] hover:border-blue-500 rounded-lg text-center transition bg-[#21252b]">
+                    <i class="fa-solid fa-cloud-arrow-up text-2xl text-blue-400 mb-2"></i>
+                    <p class="text-xs text-slate-300 font-medium">Select or drag & drop Python source file (.py)</p>
+                    <p class="text-[10px] text-slate-500 mt-1">Code will automatically populate in editor below</p>
+                    <input type="file" id="fileUploadInput" accept=".py,.txt,.json" onchange="handleFileUpload(event)" class="hidden">
+                    <button onclick="document.getElementById('fileUploadInput').click()" class="mt-3 bg-[#1b1d23] hover:bg-[#2c313a] border border-[#333842] text-xs px-4 py-1.5 rounded text-slate-200 transition">
+                        Browse Computer Files
+                    </button>
+                </div>
+
+                <!-- Manual Form & Editor Inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Package Title</label>
+                        <input type="text" id="pkgNameInput" placeholder="e.g. Data Matrix Calculator" 
+                            class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Module Import Name (python keyword)</label>
+                        <input type="text" id="pkgImportNameInput" placeholder="e.g. matrixcalc" 
+                            class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded px-3 py-2 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Source Code (.py Content)</label>
+                    <textarea id="pkgCodeInput" placeholder="# Python Module Code Source..." 
+                        class="w-full bg-[#21252b] border border-[#333842] text-slate-100 rounded p-3 text-xs font-mono h-36 focus:outline-none focus:border-blue-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <span id="adminPublishStatus" class="text-xs font-mono text-emerald-400"></span>
+                    <button onclick="publishPackageToDatabase()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2 rounded transition flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save & Publish Package
+                    </button>
+                </div>
+            </div>
+
+            <!-- Published Packages List -->
+            <div class="bg-[#1b1d23] border border-[#333842] rounded-xl p-5 shadow-lg">
+                <h3 class="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-400"></i> Active Database Libraries
+                </h3>
+                <div id="adminPackagesList" class="space-y-2">
+                    <p class="text-xs text-slate-400">Fetching stored libraries...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'go-in-python-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-key",
+            authDomain: "demo.firebaseapp.com",
+            projectId: "demo-project",
+            storageBucket: "demo.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:123456"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let pyodideInstance = null;
+        let isEngineReady = false;
+        let publishedPackages = [];
+        let currentSuggestedFix = null;
+        let currentFontSize = 13;
+
+        window.db = db;
+        window.appId = appId;
+
+        // Custom Safe Syntax Highlighting Regex Engine for Python Data Types & Keywords
+        window.renderSyntaxHighlight = function() {
+            const editor = document.getElementById('codeEditor');
+            const code = editor.value;
+            const highlightCode = document.getElementById('highlightCode');
+
+            if (!code) {
+                highlightCode.innerHTML = '';
+                return;
+            }
+
+            // Step 1: Escape pure HTML entities first to prevent tag injection into overlay text
+            let escaped = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            // Tokenizing strings, comments and keywords without exposing internal 'class' string to regex loops
+            const tokens = [];
+            const tokenMarker = '___TK_';
+
+            // 1. Strings first (Double and single quotes)
+            escaped = escaped.replace(/("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')/g, function(match) {
+                tokens.push('<span class="py-string">' + match + '</span>');
+                return tokenMarker + (tokens.length - 1) + '___';
+            });
+
+            // 2. Comments
+            escaped = escaped.replace(/(#.*$)/gm, function(match) {
+                tokens.push('<span class="py-comment">' + match + '</span>');
+                return tokenMarker + (tokens.length - 1) + '___';
+            });
+
+            // 3. Keywords (Python 'class', 'def', 'if', etc.)
+            const keywords = /\b(def|class|if|elif|else|for|while|return|import|from|as|try|except|finally|raise|with|lambda|pass|break|continue|global|assert|yield|async|await|and|or|not|is|in)\b/g;
+            escaped = escaped.replace(keywords, '<span class="py-keyword">$1</span>');
+
+            // 4. Data Types
+            const datatypes = /\b(int|str|float|list|dict|set|tuple|bool|bytes|type|True|False|None)\b/g;
+            escaped = escaped.replace(datatypes, '<span class="py-datatype">$1</span>');
+
+            // 5. Builtins
+            const builtins = /\b(print|input|len|range|enumerate|open|zip|map|filter|sum|min|max|abs|round|sorted|id)\b/g;
+            escaped = escaped.replace(builtins, '<span class="py-builtin">$1</span>');
+
+            // 6. Numbers
+            escaped = escaped.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="py-number">$1</span>');
+
+            // Restore string and comment tokens safely without matching 'class' attribute of newly injected spans
+            for (let i = 0; i < tokens.length; i++) {
+                escaped = escaped.replace(tokenMarker + i + '___', tokens[i]);
+            }
+
+            highlightCode.innerHTML = escaped + '\n';
+        };
+
+        window.syncScroll = function() {
+            const editor = document.getElementById('codeEditor');
+            const overlay = document.getElementById('highlightOverlay');
+            overlay.scrollTop = editor.scrollTop;
+            overlay.scrollLeft = editor.scrollLeft;
+        };
+
+        window.handleCodeInput = function() {
+            updateLineNumbers();
+            renderSyntaxHighlight();
+            syncScroll();
+            checkCodeDiagnostics();
+        };
+
+        window.changeFontSize = function(delta) {
+            currentFontSize = Math.max(10, Math.min(22, currentFontSize + delta));
+            document.getElementById('fontSizeDisplay').innerText = `${currentFontSize}px`;
+            
+            const fontElements = document.querySelectorAll('.code-font');
+            fontElements.forEach(el => {
+                el.style.fontSize = `${currentFontSize}px`;
+            });
+        };
+
+        // Real-time Code Diagnostic Engine
+        function checkCodeDiagnostics() {
+            const code = document.getElementById('codeEditor').value;
+            const linterBar = document.getElementById('codeLinterBar');
+            const linterMsg = document.getElementById('linterMessage');
+            const fixBtn = document.getElementById('linterFixBtn');
+
+            currentSuggestedFix = null;
+            if (!code.trim()) {
+                linterBar.classList.add('hidden');
+                return;
+            }
+
+            const lines = code.split('\n');
+            let detectedError = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+
+                // Check capitalized functions (Print, Input, Len)
+                const capFuncMatch = line.match(/\b(Print|Input|Len|Range|Str|Int|Type|List|Dict)\s*\(/);
+                if (capFuncMatch) {
+                    const incorrectFunc = capFuncMatch[1];
+                    const correctFunc = incorrectFunc.toLowerCase();
+                    detectedError = {
+                        lineNum: i + 1,
+                        msg: `Line ${i + 1}: Python is case-sensitive! Use '${correctFunc}' instead of '${incorrectFunc}'`,
+                        fix: code.replace(new RegExp(`\\b${incorrectFunc}\\s*\\(`, 'g'), `${correctFunc}(`)
+                    };
+                    break;
+                }
+            }
+
+            if (detectedError) {
+                linterBar.classList.remove('hidden');
+                linterMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${escapeHtml(detectedError.msg)}</span>`;
+                if (detectedError.fix) {
+                    currentSuggestedFix = detectedError.fix;
+                    fixBtn.classList.remove('hidden');
+                } else {
+                    fixBtn.classList.add('hidden');
+                }
+            } else {
+                linterBar.classList.add('hidden');
+            }
+        }
+
+        window.applyQuickFix = function() {
+            if (currentSuggestedFix !== null) {
+                document.getElementById('codeEditor').value = currentSuggestedFix;
+                handleCodeInput();
+            }
+        };
+
+        window.formatCode = function() {
+            let code = document.getElementById('codeEditor').value;
+            // Basic Auto Formatter: Removes trailing whitespaces
+            code = code.split('\n').map(l => l.trimEnd()).join('\n');
+            document.getElementById('codeEditor').value = code;
+            handleCodeInput();
+        };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initAuth();
+            checkAdminRoute();
+            initPyodide();
+            listenToDatabasePackages();
+        });
+
+        window.addEventListener('hashchange', checkAdminRoute);
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.error("Auth initialization:", e);
+            }
+        }
+
+        function checkAdminRoute() {
+            const isHashAdmin = window.location.hash === '#admin';
+            const isParamAdmin = new URLSearchParams(window.location.search).get('admin') === 'true';
+
+            if (isHashAdmin || isParamAdmin) {
+                document.getElementById('adminConsoleView').classList.remove('hidden');
+            } else {
+                document.getElementById('adminConsoleView').classList.add('hidden');
+            }
+        }
+
+        window.exitAdminView = function() {
+            window.location.hash = '';
+            document.getElementById('adminConsoleView').classList.add('hidden');
+        };
+
+        async function initPyodide() {
+            const badge = document.getElementById('engineStatusBadge');
+            try {
+                pyodideInstance = await loadPyodide();
+                isEngineReady = true;
+                badge.className = "text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded flex items-center gap-1.5";
+                badge.innerHTML = `<i class="fa-solid fa-circle-check text-[10px]"></i> <span class="hidden sm:inline">Engine Ready</span>`;
+            } catch (err) {
+                badge.className = "text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-1 rounded flex items-center gap-1.5";
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-[10px]"></i> <span class="hidden sm:inline">Engine Error</span>`;
+            }
+        }
+
+        window.executePython = async function() {
+            const code = document.getElementById('codeEditor').value;
+            const terminal = document.getElementById('terminalOutput');
+            const modal = document.getElementById('outputConsoleModal');
+
+            if (!isEngineReady) {
+                terminal.innerHTML = `<span class="text-amber-400">[System] Python Engine is initializing... Please wait a moment.</span>`;
+                modal.classList.remove('hidden');
+                return;
+            }
+
+            modal.classList.remove('hidden');
+            terminal.innerHTML = `<span class="text-slate-400">[Running script...]</span>\n\n`;
+
+            try {
+                pyodideInstance.runPython(`
+import sys
+import io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+                `);
+
+                await pyodideInstance.runPythonAsync(code);
+                const stdout = pyodideInstance.runPython("sys.stdout.getvalue()");
+                const stderr = pyodideInstance.runPython("sys.stderr.getvalue()");
+
+                let resultStr = '';
+                if (stdout) {
+                    // Escape HTML characters in stdout so strings like <class 'str'> display properly in terminal
+                    resultStr += escapeHtml(stdout);
+                }
+                if (stderr) {
+                    resultStr += `\n<span class="text-rose-400">${escapeHtml(stderr)}</span>`;
+                }
+                if (!stdout && !stderr) {
+                    resultStr = `<span class="text-slate-500">[Program finished with no output]</span>`;
+                }
+
+                terminal.innerHTML = resultStr;
+            } catch (err) {
+                terminal.innerHTML = `<span class="text-rose-400 font-bold">[Execution Error]</span>\n<span class="text-rose-300">${escapeHtml(err.message)}</span>`;
+            }
+        };
+
+        window.closeOutputConsole = function() {
+            document.getElementById('outputConsoleModal').classList.add('hidden');
+        };
+
+        window.clearTerminal = function() {
+            document.getElementById('terminalOutput').innerHTML = `<span class="text-slate-500">[Console Output Cleared]</span>`;
+        };
+
+        window.clearEditor = function() {
+            document.getElementById('codeEditor').value = '';
+            handleCodeInput();
+        };
+
+        function listenToDatabasePackages() {
+            const publicCol = collection(db, 'artifacts', appId, 'public', 'data', 'packages');
+            onSnapshot(publicCol, (snapshot) => {
+                publishedPackages = [];
+                snapshot.forEach(docSnap => {
+                    publishedPackages.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderPublicPackages();
+                renderAdminPackages();
+            }, (err) => {
+                console.error("Packages sync error:", err);
+            });
+        }
+
+        function renderPublicPackages() {
+            const container = document.getElementById('publicPackagesList');
+            if (publishedPackages.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">No custom packages published in database yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = publishedPackages.map(pkg => `
+                <div class="bg-[#21252b] border border-[#333842] p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold text-white">${escapeHtml(pkg.name)}</h4>
+                        <p class="text-[11px] font-mono text-blue-400">import ${escapeHtml(pkg.importName)}</p>
+                    </div>
+                    <button onclick="installPackageToPyodide('${pkg.id}')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded transition">
+                        Install
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminPackages() {
+            const container = document.getElementById('adminPackagesList');
+            if (publishedPackages.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">No libraries stored in database.</p>`;
+                return;
+            }
+
+            container.innerHTML = publishedPackages.map(pkg => `
+                <div class="bg-[#21252b] border border-[#333842] p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                        <h4 class="text-xs font-bold text-white">${escapeHtml(pkg.name)} <span class="text-slate-400 font-normal">(${pkg.importName}.py)</span></h4>
+                        <p class="text-[11px] text-slate-500">Package ID: ${pkg.id}</p>
+                    </div>
+                    <button onclick="deletePackageFromDatabase('${pkg.id}')" class="bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs px-3 py-1 rounded transition">
+                        Delete
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.installPackageToPyodide = function(pkgId) {
+            const pkg = publishedPackages.find(p => p.id === pkgId);
+            if (!pkg || !pyodideInstance) return;
+
+            try {
+                pyodideInstance.FS.writeFile(`${pkg.importName}.py`, pkg.code);
+                
+                const modal = document.getElementById('outputConsoleModal');
+                const terminal = document.getElementById('terminalOutput');
+                modal.classList.remove('hidden');
+                terminal.innerHTML = `<span class="text-emerald-400">[Package Installed Successfully]</span>\n\nYou can now use <span class="text-blue-400 font-mono">import ${pkg.importName}</span> inside your Python code!`;
+                closePackagesDrawer();
+            } catch (err) {
+                alert("Error installing package: " + err.message);
+            }
+        };
+
+        window.authenticateAdmin = function() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if (pass === 'admingo@1234') {
+                document.getElementById('adminAuthScreen').classList.add('hidden');
+                document.getElementById('adminDashboardBody').classList.remove('hidden');
+                document.getElementById('adminAuthError').classList.add('hidden');
+            } else {
+                document.getElementById('adminAuthError').classList.remove('hidden');
+            }
+        };
+
+        // File Upload Handler for Admin Panel
+        window.handleFileUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                document.getElementById('pkgCodeInput').value = content;
+                
+                // Auto fill name and import name
+                const fileNameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.'));
+                const cleanImportName = fileNameWithoutExt.toLowerCase().replace(/[^a-z0-9_]/g, '');
+                
+                document.getElementById('pkgNameInput').value = fileNameWithoutExt.replace(/_/g, ' ');
+                document.getElementById('pkgImportNameInput').value = cleanImportName;
+            };
+            reader.readAsText(file);
+        };
+
+        window.publishPackageToDatabase = async function() {
+            const name = document.getElementById('pkgNameInput').value.trim();
+            const importName = document.getElementById('pkgImportNameInput').value.trim();
+            const code = document.getElementById('pkgCodeInput').value;
+            const status = document.getElementById('adminPublishStatus');
+
+            if (!name || !importName || !code) {
+                status.className = "text-xs font-mono text-rose-400";
+                status.innerText = "Please fill in all package details!";
+                return;
+            }
+
+            try {
+                status.className = "text-xs font-mono text-amber-400";
+                status.innerText = "Publishing package to database...";
+
+                const pkgDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'packages', importName);
+                await setDoc(pkgDocRef, {
+                    name: name,
+                    importName: importName,
+                    code: code,
+                    updatedAt: new Date().toISOString()
+                });
+
+                status.className = "text-xs font-mono text-emerald-400";
+                status.innerText = `Package '${name}' successfully published!`;
+
+                document.getElementById('pkgNameInput').value = '';
+                document.getElementById('pkgImportNameInput').value = '';
+                document.getElementById('pkgCodeInput').value = '';
+            } catch (err) {
+                status.className = "text-xs font-mono text-rose-400";
+                status.innerText = "Error saving package: " + err.message;
+            }
+        };
+
+        window.deletePackageFromDatabase = async function(pkgId) {
+            if (!confirm(`Delete package '${pkgId}' permanently?`)) return;
+            try {
+                const pkgDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'packages', pkgId);
+                await deleteDoc(pkgDocRef);
+            } catch (err) {
+                alert("Error deleting: " + err.message);
+            }
+        };
+
+        window.openPackagesDrawer = function() {
+            document.getElementById('packagesDrawerModal').classList.remove('hidden');
+        };
+
+        window.closePackagesDrawer = function() {
+            document.getElementById('packagesDrawerModal').classList.add('hidden');
+        };
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+    </script>
+
+    <script>
+        function updateLineNumbers() {
+            const editor = document.getElementById('codeEditor');
+            const lines = editor.value.split('\n').length;
+            let lineStr = '';
+            for (let i = 1; i <= lines; i++) {
+                lineStr += i + '\n';
+            }
+            document.getElementById('lineNumbers').innerText = lineStr;
+        }
+
+        function handleTabIndent(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const editor = document.getElementById('codeEditor');
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                editor.value = editor.value.substring(0, start) + "    " + editor.value.substring(end);
+                editor.selectionStart = editor.selectionEnd = start + 4;
+                handleCodeInput();
+            }
+        }
+    </script>
+</body>
+</html>
